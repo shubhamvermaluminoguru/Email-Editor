@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+
+.value {
+  color: #61dafb;
+  font-weight: 700;
+  border-radius: 3;
+  border : 1px solid #61dafb;
+}
