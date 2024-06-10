@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-
+import { LineChart } from '@mui/x-charts/LineChart';
 import { Quill } from 'react-quill';
+import {pageHitsData} from './data'
+
+console.log(pageHitsData)
 
 const emailTypes = {
   "Welcome" : [
@@ -25,6 +28,13 @@ function App() {
   const [selectedType, setSelectedType] = useState(Object.keys(emailTypes)[0]);
   const [value, setValue] = useState('');
   const [template, setTemplate] = useState('');
+  
+  const [startDate, setStartDate ]=useState('');
+  const [endDate, setEndDate]=useState('');
+
+  const [graphData, setGraphData] = useState(pageHitsData);
+  const [formattedGraphData, setFormmatedGraphData]= useState({})
+  const [checkedCourseIds, setCheckedCourseIds] =useState(['c1', 'c3'])
 
   useEffect(()=>{
     setTemplate(value.replace(/#([a-zA-Z0-9]+)/g, (match, p1) => {
@@ -45,9 +55,100 @@ function App() {
     console.log(editorRef)
     setValue(editorRef.current.value)
   }
+
+
+  useEffect(()=>{
+    const totalViewsByDate = restructureData(graphData);
+    console.log(totalViewsByDate)
+    setFormmatedGraphData(totalViewsByDate)
+  },[startDate, endDate])
+
+  // Function to restructure the data as per the desired format
+  function restructureData(courseViews) {
+    const totalViewsByDate = {};
+    const subjects = {};
+
+    const date1 = new Date(startDate);
+    const date2 = new Date(endDate);
+
+    const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    // Calculate total views by date
+    courseViews.forEach(view => {
+      //Check if view is in valid date range
+      if(startDate <= view.date && view.date <=endDate)
+      {
+    
+        if (!totalViewsByDate[view.date]) {
+          totalViewsByDate[view.date] = 1;
+        } else {
+          totalViewsByDate[view.date]++;
+        }
+  
+        // Store views for each subject
+        let subjectKey = `${view.courseId}_${view.courseName}`
+        if (!subjects[subjectKey]) {
+          subjects[subjectKey] = {};
+        }
+        const key = view.date;
+        if (!subjects[subjectKey][key]) {
+          subjects[subjectKey][key] = 1;
+        } else {
+          subjects[subjectKey][key]++;
+        }
+  
+      }
+  
+
+    });
+
+    const result = {
+      totalViews: totalViewsByDate,
+      subjects: subjects
+    };
+
+    return result;
+  }
+
+
   return (
     <div className="App">
-      <div style={{display:'flex', flexDirection:'row', gap: 20, padding:20}}>
+
+      <div>
+        <input type="date" value={startDate} onChange={(e)=>setStartDate(e.target.value)}/>
+        <input type="date" value={endDate} onChange={(e)=>setEndDate(e.target.value)}/>
+      </div>
+
+      <LineChart
+        xAxis={[{ scaleType: 'point', data: Object.keys(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) ? Object.keys(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) : [] }]}
+        series={[
+          {
+            label: "Total Views",
+            curve: "catmullRom",
+            data: Object.values(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) ? Object.values(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) : [],
+          },
+          ...Object.keys(formattedGraphData?.subjects? formattedGraphData?.subjects : {}).map((key) =>{
+            if(checkedCourseIds.includes(key.split('_')[0]))
+              {return {
+                label: key,
+                curve: "catmullRom",
+                data: Object.values(formattedGraphData?.subjects[key] ? formattedGraphData?.subjects[key] :{}),
+              }}
+
+              return{
+                label:key,
+                data:[]
+              }
+            
+          })
+        ]}
+        width={800}
+        height={500}
+        grid={{ vertical: true, horizontal: true }}
+      />
+
+      {/* <div style={{display:'flex', flexDirection:'row', gap: 20, padding:20}}>
         <div style={{flex:1}}> 
           <select onChange={(e) => setSelectedType(e.target.value)}>
             {Object.keys(emailTypes).map((key) => 
@@ -69,7 +170,7 @@ function App() {
           <div dangerouslySetInnerHTML={{__html: template}} style={{textAlign: 'left'}}>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
