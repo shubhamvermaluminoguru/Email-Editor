@@ -252,14 +252,16 @@ function App() {
         series={[
           {
             label: "Total Views",
-            curve: "catmullRom",
+            // showMark: false,
+            curve: "linear",
             data: Object.values(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) ? Object.values(formattedGraphData?.totalViews? formattedGraphData?.totalViews : {}) : [],
           },
           ...Object.keys(formattedGraphData?.subjects? formattedGraphData?.subjects : {}).map((key) =>{
             if(checkedCourseIds.includes(key.split('_')[0]))
               {return {
                 label: key,
-                curve: "catmullRom",
+                curve: "linear",
+                // showMark: false,
                 data: Object.values(formattedGraphData?.subjects[key] ? formattedGraphData?.subjects[key] :{}),
               }}
 
@@ -273,10 +275,19 @@ function App() {
         width={800}
         height={500}
         grid={{ vertical: false, horizontal: true }}
+
+        sx={{
+          ".MuiChartsAxis-line": {
+            display: "none",
+          },
+          " .MuiChartsAxis-tick": {
+            display: "none",
+          }
+        }}
       />
 
       </div>
-    <div style={{height: '500', width:800}}>
+    <div style={{height: '500px', width:'800px'}}>
      <AgChartsReact options={options} />
 
     </div>

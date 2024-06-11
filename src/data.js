@@ -5,7 +5,7 @@ function randomDate(start, end) {
   
   // Generate page hit data for each course over a span of three months
 function generatePageHitsData() {
-    const startDate = new Date('2023-01-01');
+    const startDate = new Date('2023-12-12');
     const endDate = new Date('2024-12-31');
     
     const courses = [
@@ -21,8 +21,8 @@ function generatePageHitsData() {
     let currentDate = startDate;
     while (currentDate <= endDate) {
       // Simulate random page hits for each course on different dates
-      let numberOfEntries = Math.floor(Math.random() * 60) + 30;
-      while (numberOfEntries>0){
+      let numberOfEntries = Math.floor(Math.random() * 70+ Math.floor(pageHitsData.length/130)) + 2 ;
+      while (numberOfEntries){
         const randomeIndex = Math.floor(Math.random() * 4) + 0; // Random number of hits (1-100)
         pageHitsData.push({
           courseId: courses[randomeIndex].courseId,
